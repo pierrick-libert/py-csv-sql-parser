@@ -1,0 +1,4 @@
+psycopg2==2.9.2
+pur==5.4.2
+pylint==2.12.2
+pylint-plugin-utils==0.6
