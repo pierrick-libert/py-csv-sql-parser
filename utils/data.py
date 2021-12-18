@@ -64,7 +64,7 @@ class Data:
             if Utils.is_integer(value) is False or value not in ['0', '1']:
                 return None
             return value == '1'
-        if datatype == 'INTEGER':
+        if 'INT' in [datatype]:
             return None if Utils.is_integer(value) is False else int(value)
 
         return f'\'{value}\''

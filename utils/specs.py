@@ -70,6 +70,10 @@ class Specs:
                     size = int(row[1].strip())
                     datatype = row[2].strip().lower()
 
+                    # Check if the size if inferior to 1
+                    if size < 1:
+                        raise FileErrorException(file, idx + 2, 'Width must be a positive integer')
+
                     # Check if we don't have any error in the type
                     row_type = self.define_row_type(size, datatype)
                     if row_type is None:
@@ -94,7 +98,11 @@ class Specs:
         if datatype in ['boolean', 'bool']:
             return 'BOOL'
         if datatype in ['integer', 'int']:
-            return 'INTEGER'
+            if size < 5:
+                return 'SMALLINT'
+            if size < 10:
+                return 'INTEGER'
+            return 'BIGINT'
         if datatype in ['text', 'varchar', 'char', 'str', 'string']:
             if size > (10 * 1024 * 1024):
                 return 'TEXT'
