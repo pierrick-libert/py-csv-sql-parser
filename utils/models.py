@@ -1,7 +1,7 @@
 '''DB connection'''
 import sys
 
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from contextlib import contextmanager
 
@@ -60,28 +60,28 @@ class DB:
                 return
             session.commit()
 
-    def create_table(self, columns: List[Column], table_name: str) -> Table:
+    def create_table(self, columns: List[Column], table_name: str) -> Union[Table, bool]:
         '''Create the table based on parameters'''
         table = Table(table_name, MetaData(), *columns)
         if inspect(self.__engine).has_table(table_name):
-            return table
+            return table, False
 
         with self.get_session() as session:
             # Create the table
             table_creation_sql = CreateTable(table)
             session.execute(table_creation_sql)
-        return table
+        return table, True
 
-    def create_table_from_model(self, model) -> Table:
+    def create_table_from_model(self, model) -> Union[Table, bool]:
         '''Create the table based on parameters'''
         if inspect(self.__engine).has_table(model.__table__.name):
-            return model.__table__
+            return model.__table__, False
 
         with self.get_session() as session:
             # Create the table
             table_creation_sql = CreateTable(model.__table__)
             session.execute(table_creation_sql)
-        return model.__table__
+        return model.__table__, True
 
     def bulk_insert(self, table: Table, values: List) -> None:
         '''Bulk insert data in a specific table'''

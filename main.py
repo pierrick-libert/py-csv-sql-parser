@@ -17,7 +17,7 @@ def main(dry_run: bool) -> None:
     '''Launch the process to create table and fill them'''
     # Instantiate the DB and create the migration table
     db_obj = DB(dry_run)
-    migration_table = db_obj.create_table_from_model(Migration())
+    migration_table, created = db_obj.create_table_from_model(Migration())
 
     # Treat specifications
     specs = Specs(db_obj)
@@ -25,7 +25,11 @@ def main(dry_run: bool) -> None:
     for file in glob.glob('specs/*.csv'):
         # Create the table in DB
         try:
-            table, columns = specs.create_table(file)
+            table, created, columns = specs.create_table(file)
+            txt = f'{BColors.BOLD}{BColors.OKCYAN}{file}\'s table already existed'
+            if created is True:
+                txt = f'{BColors.BOLD}{BColors.OKGREEN}{file}\'s table has been created'
+            print(f'{txt}{BColors.ENDC}')
         except (Exception, SQLAlchemyError, FileErrorException) as error:
             print(f'{BColors.BOLD}{BColors.FAIL}{str(error)[1:]}{BColors.ENDC}\n')
             continue

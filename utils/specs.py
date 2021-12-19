@@ -89,9 +89,9 @@ class Specs:
             # Create the table if it doesn't exist
             if len(error_txt) != 0:
                 raise Exception(error_txt)
-            table = self.__db.create_table(columns, table_name)
+            table, created = self.__db.create_table(columns, table_name)
 
         except (Exception, SQLAlchemyError, FileErrorException) as error:
             raise Exception(error) from error
 
-        return table, custom_columns
+        return table, created, custom_columns
