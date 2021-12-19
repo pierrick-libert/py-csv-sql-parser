@@ -16,9 +16,25 @@ To delete all dependencies:
 make clean
 ```
 
-## Basic configuration
+## Launch
 
-You'll have to create a database in PostgreSQL in order to run the code and then to add it to your environment variables.
+### Basic Mode
+
+You can launch the programm by running this command:
+
+```bash
+make launch
+```
+
+### Dry Mode
+
+But you may also want to launch in dry mode with this command:
+
+```bash
+make launch_dry
+```
+
+You'll be able to see the different errors you may have and the SQL requests which would be run in basic mode.
 
 ## Test
 
