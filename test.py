@@ -18,7 +18,7 @@ class TestProcess(unittest.TestCase):
     __db_obj = None
     __db_name = f'{DATABASE["NAME"]}_test'
 
-    def test_specs_success(self):
+    def test_specs_success(self) -> None:
         '''Test the import of successful specs'''
         # Init specs
         specs = Specs(self.__db_obj, 'specs/test/')
@@ -37,7 +37,7 @@ class TestProcess(unittest.TestCase):
         table, created, columns = specs.create_table('specs/test/normal.csv')
         self.assertEqual(table.name, 'normal')
 
-    def test_specs_error(self):
+    def test_specs_error(self) -> None:
         '''Test the import of wrong specs'''
         # Init specs
         specs = Specs(self.__db_obj, 'specs/test/')
@@ -45,7 +45,7 @@ class TestProcess(unittest.TestCase):
         self.assertRaises(Exception, specs.create_table, 'specs/test/exception.csv')
         self.assertRaises(Exception, specs.create_table, 'specs/test/empty.csv')
 
-    def test_data_success(self):
+    def test_data_success(self) -> None:
         '''Test the import of successful data'''
         # Init
         specs = Specs(self.__db_obj, 'specs/test/')
@@ -65,7 +65,7 @@ class TestProcess(unittest.TestCase):
         data = Data(table, columns, self.__db_obj)
         self.assertEqual(None, data.insert_data('data/test/tricky_2021-12-12.txt'))
 
-    def test_data_error(self):
+    def test_data_error(self) -> None:
         '''Test the import of wrong data'''
         # Init
         specs = Specs(self.__db_obj, 'specs/test/')
@@ -76,17 +76,15 @@ class TestProcess(unittest.TestCase):
         self.assertRaises(Exception, data.insert_data, 'data/test/normal_2021-10-12.txt')
 
     @classmethod
-    def setUpClass(cls):
-        '''Setup method to create the test database and then dummy file'''
-        print('\nSet up Class')
+    def setUpClass(cls) -> None:
+        '''Setup method to create the test database'''
         # Create the Test Database
         cls.__db_obj = DB(name=cls.__db_name, verbose=False)
         print(f'{BColors.BOLD}{BColors.OKGREEN}{cls.__db_name} DB created{BColors.ENDC}')
 
     @classmethod
-    def tearDownClass(cls):
-        '''Method called after all tests are performed to remove the DB and file'''
-        print('\nTear Down Class')
+    def tearDownClass(cls) -> None:
+        '''Method called after all tests are performed to remove the DB'''
         if database_exists(cls.__db_obj.get_engine().url):
             drop_database(cls.__db_obj.get_engine().url)
             print(f'{BColors.BOLD}{BColors.OKGREEN}{cls.__db_name} DB deleted{BColors.ENDC}')
