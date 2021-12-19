@@ -27,7 +27,7 @@ def main(dry_run: bool) -> None:
         try:
             table, columns = specs.create_table(file)
         except (Exception, SQLAlchemyError, FileErrorException) as error:
-            print(f'{BColors.BOLD}{BColors.FAIL}{error}{BColors.ENDC}')
+            print(f'{BColors.BOLD}{BColors.FAIL}{str(error)[1:]}{BColors.ENDC}\n')
             continue
 
         # Insert the data inside the table
@@ -36,18 +36,16 @@ def main(dry_run: bool) -> None:
             try:
                 # Check if we already pass the migration to not insert data twice
                 if db_obj.has_migration(data_file) is True:
-                    txt = f'{BColors.BOLD}{BColors.OKCYAN}{data_file} '
-                    print(f'{txt} has already been migrated{BColors.ENDC}')
+                    txt = f'{BColors.BOLD}{BColors.OKCYAN}{data_file}'
+                    print(f'{txt} has already been migrated{BColors.ENDC}\n')
                     continue
-                errors = data.insert_data(data_file)
-                if len(errors) > 0:
-                    print(f'{BColors.FAIL}Error(s) occurred during the process:{BColors.ENDC}')
-                    for error in errors:
-                        print(f'{BColors.BOLD}{BColors.FAIL}   {error}{BColors.ENDC}')
-                else:
-                    db_obj.bulk_insert(migration_table, [{'filename': data_file}])
+                # Insert the data for the file and the migration
+                data.insert_data(data_file)
+                db_obj.bulk_insert(migration_table, [{'filename': data_file}])
+                txt = f'{BColors.BOLD}{BColors.OKGREEN}{data_file}\'s data has been inserted'
+                print(f'{txt}{BColors.ENDC}\n')
             except (Exception, SQLAlchemyError) as error:
-                print(f'{BColors.BOLD}{BColors.FAIL}{error}{BColors.ENDC}')
+                print(f'{BColors.BOLD}{BColors.FAIL}{str(error)[1:]}{BColors.ENDC}\n')
                 continue
 
 if __name__ == '__main__':

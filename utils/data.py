@@ -19,7 +19,7 @@ class Data:
         '''Save the db connection'''
         self.__db = db_obj
         self.table = table
-        self.errors = []
+        self.error = ''
         self.columns = columns
 
     def insert_data(self, file: str) -> str:
@@ -42,14 +42,15 @@ class Data:
                         # We add the data into the query if we got no error
                         data.append(self.check_values(values, file, idx))
                     except FileErrorException as error:
-                        self.errors.append(str(error))
+                        self.error = f'{self.error}\n{str(error)}'
                         continue
             # Insert data if we're got no error
-            if len(self.errors) == 0:
-                self.__db.bulk_insert(self.table, data)
+            if len(self.error) != 0:
+                raise Exception(self.error)
+            self.__db.bulk_insert(self.table, data)
         except (Exception, SQLAlchemyError) as error:
             raise Exception(error) from error
-        return self.errors
+        return self.error
 
     # pylint: disable=no-self-use
     def format_value(self, datatype: str, value: str) -> Optional[Union[str, int, bool]]:
