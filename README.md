@@ -1,4 +1,4 @@
-# Python CSV to SQL parser
+# Clover Health Assignment Libert Pierrick
 
 Requires Python 3.9+ and PostgreSQL 14+
 
