@@ -2,9 +2,9 @@
 import re
 import csv
 
-from typing import List, Optional, TypedDict
+from typing import List, TypedDict
 
-from psycopg2 import DatabaseError
+from sqlalchemy.exc import SQLAlchemyError
 
 from .models import DB
 from .utils import Utils
@@ -22,13 +22,14 @@ class FileErrorException(Exception):
         return f'In file "{self.file}", line {self.idx}: {self.message}'
 
 
-class Column(TypedDict):
+class CustomColumn(TypedDict):
     '''Type dict for column'''
     name: str
     size: int
     datatype: str
 
 
+# pylint: disable=too-few-public-methods
 class Specs:
     '''Class to handle the first part of the project'''
     __db = None
@@ -37,20 +38,17 @@ class Specs:
         '''Save the db connection'''
         self.__db = db_obj
 
-    def create_table(self, file: str) -> List[Column]:
+    def create_table(self, file: str) -> List[CustomColumn]:
         '''Create the table from the file received'''
         try:
-            table_name = re.search('specs/(.+?).csv', file).group(1)
+            table_name: str = re.search('specs/(.+?).csv', file).group(1)
         except AttributeError as error:
             raise Exception(error) from error
 
         columns = []
+        custom_columns = []
         # Here parse and create the table
         try:
-            # Create a cursor to communicate with the DB
-            cursor = self.__db.get_conn().cursor()
-            query = f'CREATE TABLE IF NOT EXISTS {table_name} ('
-
             # Parse the file
             with open(file, mode='r', encoding='utf-8') as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=',')
@@ -66,7 +64,7 @@ class Specs:
                     if Utils.is_integer(row[1]) is False:
                         raise FileErrorException(file, idx + 2, 'Width must be an integer')
                     # Proceed to small modifications on the data to avoid easy mistake
-                    column = re.sub(r'[-\t\s]+', '_', row[0].strip().lower())
+                    name = re.sub(r'[-\t\s]+', '_', row[0].strip().lower())
                     size = int(row[1].strip())
                     datatype = row[2].strip().lower()
 
@@ -75,36 +73,17 @@ class Specs:
                         raise FileErrorException(file, idx + 2, 'Width must be a positive integer')
 
                     # Check if we don't have any error in the type
-                    row_type = self.define_row_type(size, datatype)
-                    if row_type is None:
+                    column = self.__db.define_column_type(name, size, datatype)
+                    if column is None:
                         raise FileErrorException(file, idx + 2, 'Unknown datatype')
+                    columns.append(column)
+                    custom_columns.append({
+                        'name': name, 'size': size, 'datatype': str(column.type)})
 
-                    # Dynamically create the query
-                    query += f'{column} {row_type} NOT NULL,'
-                    columns.append({'name': column, 'size': size, 'datatype': row_type})
+            # Create the table if it doesn't exist
+            table = self.__db.create_table(columns, table_name)
 
-            query = f'{query[:-1]})'
-            cursor.execute(query, [])
-            self.__db.get_conn().commit()
+        except (Exception, SQLAlchemyError, FileErrorException) as error:
+            raise Exception(error) from error
 
-        except (Exception, DatabaseError, FileErrorException):
-            self.__db.get_conn().rollback()
-            raise
-        return table_name, columns
-
-    # pylint: disable=no-self-use
-    def define_row_type(self, size: int, datatype: str) -> Optional[str]:
-        '''Define the row type based on datatype'''
-        if datatype in ['boolean', 'bool']:
-            return 'BOOL'
-        if datatype in ['integer', 'int']:
-            if size < 5:
-                return 'SMALLINT'
-            if size < 10:
-                return 'INTEGER'
-            return 'BIGINT'
-        if datatype in ['text', 'varchar', 'char', 'str', 'string']:
-            if size > (10 * 1024 * 1024):
-                return 'TEXT'
-            return f'VARCHAR({size})'
-        return None
+        return table, custom_columns
