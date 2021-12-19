@@ -1,0 +1,4 @@
+Diabetes  01
+Asthma    0-14
+Stroke    0122
+Stroke    0122ignoredpart

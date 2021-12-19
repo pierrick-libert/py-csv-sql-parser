@@ -16,7 +16,7 @@ from models.migration import Migration
 def main(dry_run: bool) -> None:
     '''Launch the process to create table and fill them'''
     # Instantiate the DB and create the migration table
-    db_obj = DB(dry_run)
+    db_obj = DB(dry_run=dry_run)
     migration_table, created = db_obj.create_table_from_model(Migration())
 
     # Treat specifications

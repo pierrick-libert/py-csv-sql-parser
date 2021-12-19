@@ -1,0 +1,19 @@
+"column name",width,datatype
+name,10,VARCHAR
+valid,1,BOOLEAN
+count,3,int
+name2,10,VARCHAR
+valid2,1,BOOLEAN
+count2,3,int
+name3,10,VARCHAR
+valid3,1,BOOLEAN
+count3,3,int
+name4,10,VARCHAR
+valid4,1,BOOLEAN
+count4,3,int
+name5,10,VARCHAR
+valid5,1,BOOLEAN
+count5,3,int
+name6,10,VARCHAR
+valid6,1,BOOLEAN
+count6,3,int

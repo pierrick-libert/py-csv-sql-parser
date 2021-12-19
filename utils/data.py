@@ -22,7 +22,7 @@ class Data:
         self.error = ''
         self.columns = columns
 
-    def insert_data(self, file: str) -> str:
+    def insert_data(self, file: str) -> None:
         '''Create the table from the file received'''
         # Here parse and create the table
         try:
@@ -47,10 +47,12 @@ class Data:
             # Insert data if we're got no error
             if len(self.error) != 0:
                 raise Exception(self.error)
+            if len(data) == 0:
+                raise FileErrorException(file, 1, 'Empty file')
+
             self.__db.bulk_insert(self.table, data)
         except (Exception, SQLAlchemyError) as error:
             raise Exception(error) from error
-        return self.error
 
     # pylint: disable=no-self-use
     def format_value(self, datatype: str, value: str) -> Optional[Union[str, int, bool]]:

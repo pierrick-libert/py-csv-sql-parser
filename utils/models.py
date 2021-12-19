@@ -15,6 +15,8 @@ from sqlalchemy.types import (
     SmallInteger, Integer, BigInteger
 )
 from sqlalchemy.schema import CreateTable
+from sqlalchemy.engine import Engine
+from sqlalchemy_utils import database_exists, create_database
 
 from settings.base import DATABASE
 
@@ -28,19 +30,22 @@ class DB:
 
     # pylint: disable=too-many-arguments
     def __init__(self,
-        dry_run: bool = False,
         name: str = DATABASE['NAME'],
         user: str = DATABASE['USER'],
         password: str = DATABASE['PASSWORD'],
         host: str = DATABASE['HOST'],
-        port: int = DATABASE['PORT']
+        port: int = DATABASE['PORT'],
+        dry_run: bool = False,
+        verbose: bool = True,
     ):
         '''Create the connection to the DB'''
         try:
             self.dry_run = dry_run
             self.__engine = create_engine(
-                f'postgresql://{user}:{password}@{host}:{port}/{name}', echo = True
+                f'postgresql://{user}:{password}@{host}:{port}/{name}', echo = verbose
             )
+            if not database_exists(self.__engine.url):
+                create_database(self.__engine.url)
         except SQLAlchemyError as error:
             print(f'An error occurred while connecting to the DB; {error}')
             sys.exit(1)
@@ -59,6 +64,10 @@ class DB:
             if self.dry_run is True:
                 return
             session.commit()
+
+    def get_engine(self) -> Engine:
+        '''Return the engine object created in the constructor'''
+        return self.__engine
 
     def create_table(self, columns: List[Column], table_name: str) -> Union[Table, bool]:
         '''Create the table based on parameters'''

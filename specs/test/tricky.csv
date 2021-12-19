@@ -1,0 +1,6 @@
+"column name",width,datatype
+name t,10,VARCHAR
+valid-t,1,BOOLEAN
+count	r,3,int
+count.t,3,int
+valid!a,3,int

@@ -33,15 +33,18 @@ class CustomColumn(TypedDict):
 class Specs:
     '''Class to handle the first part of the project'''
     __db = None
+    prefix = ''
 
-    def __init__(self, db_obj: DB):
+    def __init__(self, db_obj: DB, prefix: str = 'specs/'):
         '''Save the db connection'''
         self.__db = db_obj
+        self.prefix = prefix
 
+    # pylint: disable=too-many-locals
     def create_table(self, file: str) -> List[CustomColumn]:
         '''Create the table from the file received'''
         try:
-            table_name: str = re.search('specs/(.+?).csv', file).group(1)
+            table_name: str = re.search(f'{self.prefix}(.+?).csv', file).group(1)
         except AttributeError as error:
             raise Exception(error) from error
 
@@ -66,7 +69,7 @@ class Specs:
                         if Utils.is_integer(row[1]) is False:
                             raise FileErrorException(file, idx + 2, 'Width must be an integer')
                         # Proceed to small modifications on the data to avoid easy mistake
-                        name = re.sub(r'[-\t\s]+', '_', row[0].strip().lower())
+                        name = re.sub(r'[\W]+', '_', row[0].strip().lower())
                         size = int(row[1].strip())
                         datatype = row[2].strip().lower()
 
@@ -89,8 +92,10 @@ class Specs:
             # Create the table if it doesn't exist
             if len(error_txt) != 0:
                 raise Exception(error_txt)
-            table, created = self.__db.create_table(columns, table_name)
+            if len(columns) == 0:
+                raise FileErrorException(file, 1, 'Empty file')
 
+            table, created = self.__db.create_table(columns, table_name)
         except (Exception, SQLAlchemyError, FileErrorException) as error:
             raise Exception(error) from error
 
