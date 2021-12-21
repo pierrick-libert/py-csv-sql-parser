@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from utils.data import Data
 from utils.models import DB
-from utils.utils import BColors
+from utils.utils import Utils, BColors
 from utils.specs import Specs, FileErrorException
 
 from models.migration import Migration
@@ -26,12 +26,12 @@ def main(dry_run: bool) -> None:
         # Create the table in DB
         try:
             table, created, columns = specs.create_table(file)
-            txt = f'{BColors.BOLD}{BColors.OKCYAN}{file}\'s table already existed'
             if created is True:
-                txt = f'{BColors.BOLD}{BColors.OKGREEN}{file}\'s table has been created'
-            print(f'{txt}{BColors.ENDC}')
+                Utils.display(f'{file}\'s table has been created', BColors.OKGREEN)
+            else:
+                Utils.display(f'{file}\'s table already existed', BColors.OKCYAN)
         except (Exception, SQLAlchemyError, FileErrorException) as error:
-            print(f'{BColors.BOLD}{BColors.FAIL}{str(error)[1:]}{BColors.ENDC}\n')
+            Utils.display(f'{str(error)[1:]}\n', BColors.FAIL)
             continue
 
         # Insert the data inside the table
@@ -40,16 +40,16 @@ def main(dry_run: bool) -> None:
             try:
                 # Check if we already pass the migration to not insert data twice
                 if db_obj.has_migration(data_file) is True:
-                    txt = f'{BColors.BOLD}{BColors.OKCYAN}{data_file}'
-                    print(f'{txt} has already been migrated{BColors.ENDC}\n')
+                    Utils.display(f'{data_file} has already been migrated\n', BColors.OKCYAN)
                     continue
                 # Insert the data for the file and the migration
                 data.insert_data(data_file)
-                db_obj.bulk_insert(migration_table, [{'filename': data_file}])
-                txt = f'{BColors.BOLD}{BColors.OKGREEN}{data_file}\'s data has been inserted'
-                print(f'{txt}{BColors.ENDC}\n')
+                if dry_run is False:
+                    db_obj.bulk_insert(migration_table, [{'filename': data_file}])
+                # Print information
+                Utils.display(f'{data_file}\'s data has been inserted\n', BColors.OKGREEN)
             except (Exception, SQLAlchemyError) as error:
-                print(f'{BColors.BOLD}{BColors.FAIL}{str(error)[1:]}{BColors.ENDC}\n')
+                Utils.display(f'{str(error)[1:]}\n', BColors.FAIL)
                 continue
 
 if __name__ == '__main__':

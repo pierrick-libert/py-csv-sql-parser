@@ -6,7 +6,7 @@ from sqlalchemy_utils import database_exists, drop_database
 from settings.base import DATABASE
 
 from utils.models import DB
-from utils.utils import BColors
+from utils.utils import BColors, Utils
 from utils.data import Data
 from utils.specs import Specs
 
@@ -16,7 +16,7 @@ class TestProcess(unittest.TestCase):
     '''Unit Test class for the process'''
 
     __db_obj = None
-    __db_name = f'{DATABASE["NAME"]}_test'
+    __db_uri = f'{DATABASE["URI"]}_test'
 
     def test_specs_success(self) -> None:
         '''Test the import of successful specs'''
@@ -79,15 +79,17 @@ class TestProcess(unittest.TestCase):
     def setUpClass(cls) -> None:
         '''Setup method to create the test database'''
         # Create the Test Database
-        cls.__db_obj = DB(name=cls.__db_name, verbose=False)
-        print(f'{BColors.BOLD}{BColors.OKGREEN}{cls.__db_name} DB created{BColors.ENDC}')
+        cls.__db_obj = DB(uri=cls.__db_uri, verbose=False)
+        Utils.display(
+            f'{cls.__db_uri[cls.__db_uri.rfind("/") + 1:]} DB Created', BColors.OKGREEN)
 
     @classmethod
     def tearDownClass(cls) -> None:
         '''Method called after all tests are performed to remove the DB'''
         if database_exists(cls.__db_obj.get_engine().url):
             drop_database(cls.__db_obj.get_engine().url)
-            print(f'{BColors.BOLD}{BColors.OKGREEN}{cls.__db_name} DB deleted{BColors.ENDC}')
+            Utils.display(
+                f'\n{cls.__db_uri[cls.__db_uri.rfind("/") + 1:]} DB Deleted', BColors.OKGREEN)
 
 if __name__ == '__main__':
     unittest.main()

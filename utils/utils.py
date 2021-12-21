@@ -1,4 +1,6 @@
 '''Utils file'''
+from settings.base import ENV
+
 
 # pylint: disable=too-few-public-methods
 class Utils:
@@ -12,6 +14,13 @@ class Utils:
         except ValueError:
             return False
         return float(value).is_integer()
+
+    @classmethod
+    def display(cls, text: str, color: str) -> None:
+        '''Display the text with color if not in production'''
+        if ENV == 'production':
+            return print(f'{text}')
+        print(f'{BColors.BOLD}{color}{text}{BColors.ENDC}')
 
 
 # pylint: disable=too-few-public-methods
