@@ -1,6 +1,6 @@
 psycopg2==2.9.3
-pur==6.0.1
-pylint==2.12.2
+pur==7.0.0
+pylint==2.13.9
 pylint-plugin-utils==0.7
-SQLAlchemy==1.4.32
+SQLAlchemy==1.4.36
 sqlalchemy-utils==0.38.2

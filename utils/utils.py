@@ -19,7 +19,7 @@ class Utils:
     def display(cls, text: str, color: str) -> None:
         '''Display the text with color if not in production'''
         if ENV == 'production':
-            return print(f'{text}')
+            print(f'{text}')
         print(f'{BColors.BOLD}{color}{text}{BColors.ENDC}')
 
 

@@ -4,8 +4,6 @@ import csv
 
 from typing import List, TypedDict
 
-from sqlalchemy.exc import SQLAlchemyError
-
 from .models import DB
 from .utils import Utils
 
